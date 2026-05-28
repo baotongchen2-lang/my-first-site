@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>房屋出租管理</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Rental Manager</p>
+        <h1>房屋出租管理</h1>
+      </div>
+      <div class="summary" aria-label="租客统计">
+        <span id="totalCount">0 位租客</span>
+        <span id="paidCount">0 已缴租</span>
+      </div>
+    </header>
+
+    <section class="panel form-panel" aria-labelledby="formTitle">
+      <h2 id="formTitle">添加租客</h2>
+      <form id="tenantForm">
+        <label>
+          租客姓名
+          <input id="tenantName" type="text" placeholder="例如：王先生" required>
+        </label>
+        <label>
+          月租金额
+          <input id="rentAmount" type="number" min="0" step="1" placeholder="例如：3500" required>
+        </label>
+        <label>
+          押金
+          <input id="depositAmount" type="number" min="0" step="1" placeholder="例如：7000" required>
+        </label>
+        <label>
+          到期时间
+          <input id="dueDate" type="date" required>
+        </label>
+        <label class="wide">
+          家具损坏备注
+          <textarea id="damageNote" rows="3" placeholder="例如：客厅椅子有划痕"></textarea>
+        </label>
+        <label class="check-row">
+          <input id="isPaid" type="checkbox">
+          <span>本月已缴租</span>
+        </label>
+        <button type="submit">添加记录</button>
+      </form>
+    </section>
+
+    <section class="panel table-panel" aria-labelledby="listTitle">
+      <div class="section-head">
+        <h2 id="listTitle">租客列表</h2>
+        <button class="ghost" id="clearAll" type="button">清空</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>租客</th>
+              <th>月租</th>
+              <th>押金</th>
+              <th>缴租</th>
+              <th>到期时间</th>
+              <th>家具损坏备注</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="tenantList"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="emptyState">暂无租客记录</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
