@@ -53,7 +53,7 @@ tenantForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const tenant = {
-    name: document.getElementById("tenantName").value,
+    name: document.getElementById("name").value,
     rent: Number(document.getElementById("rent").value),
     deposit: Number(document.getElementById("deposit").value),
     paid: document.getElementById("paid").checked,
