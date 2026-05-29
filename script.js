@@ -8,6 +8,7 @@ const tenantList = document.getElementById("tenantList");
 const emptyState = document.getElementById("emptyState");
 const totalCount = document.getElementById("totalCount");
 const paidCount = document.getElementById("paidCount");
+const clearAllButton = document.getElementById("clearAll");
 
 async function loadTenants() {
   const { data, error } = await supabaseClient
@@ -28,7 +29,7 @@ function renderTenants(tenants) {
   tenantList.innerHTML = "";
 
   totalCount.textContent = `${tenants.length} 位租客`;
-  paidCount.textContent = `${tenants.filter(t => t.paid).length} 已缴租`;
+  paidCount.textContent = `${tenants.filter((tenant) => tenant.paid).length} 已缴租`;
 
   emptyState.style.display = tenants.length === 0 ? "block" : "none";
 
@@ -36,29 +37,37 @@ function renderTenants(tenants) {
     const row = document.createElement("tr");
 
     row.innerHTML = `
-      <td>${tenant.name || ""}</td>
-      <td>￥${tenant.rent || 0}</td>
-      <td>￥${tenant.deposit || 0}</td>
-      <td>${tenant.paid ? "已缴" : "未缴"}</td>
-      <td>${tenant.due_date || ""}</td>
-      <td>${tenant.note || "无"}</td>
-      <td><button onclick="deleteTenant(${tenant.id})">删除</button></td>
+      <td>${escapeHTML(tenant.name || "")}</td>
+      <td>￥${Number(tenant.rent || 0).toLocaleString()}</td>
+      <td>￥${Number(tenant.deposit || 0).toLocaleString()}</td>
+      <td>
+        <span class="${tenant.paid ? "paid" : "unpaid"}">
+          ${tenant.paid ? "已缴" : "未缴"}
+        </span>
+      </td>
+      <td>${escapeHTML(tenant.due_date || "")}</td>
+      <td>${escapeHTML(tenant.note || "无")}</td>
+      <td>
+        <button class="danger" type="button" onclick="deleteTenant(${tenant.id})">
+          删除
+        </button>
+      </td>
     `;
 
     tenantList.appendChild(row);
   });
 }
 
-tenantForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+tenantForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
 
   const tenant = {
-    name: document.getElementById("name").value,
-    rent: Number(document.getElementById("rent").value),
-    deposit: Number(document.getElementById("deposit").value),
-    paid: document.getElementById("paid").checked,
+    name: document.getElementById("tenantName").value.trim(),
+    rent: Number(document.getElementById("rentAmount").value),
+    deposit: Number(document.getElementById("depositAmount").value),
+    paid: document.getElementById("isPaid").checked,
     due_date: document.getElementById("dueDate").value,
-    note: document.getElementById("note").value,
+    note: document.getElementById("damageNote").value.trim(),
   };
 
   const { error } = await supabaseClient
@@ -73,21 +82,54 @@ tenantForm.addEventListener("submit", async (e) => {
 
   alert("添加成功");
   tenantForm.reset();
-  loadTenants();
+  await loadTenants();
 });
 
 async function deleteTenant(id) {
+  const confirmDelete = confirm("确定要删除这条租客记录吗？");
+
+  if (!confirmDelete) return;
+
   const { error } = await supabaseClient
     .from("tenants")
     .delete()
     .eq("id", id);
 
   if (error) {
+    console.error("删除失败：", error);
     alert("删除失败：" + error.message);
     return;
   }
 
-  loadTenants();
+  await loadTenants();
+}
+
+clearAllButton.addEventListener("click", async () => {
+  const confirmClear = confirm("确定要清空所有租客记录吗？");
+
+  if (!confirmClear) return;
+
+  const { error } = await supabaseClient
+    .from("tenants")
+    .delete()
+    .neq("id", 0);
+
+  if (error) {
+    console.error("清空失败：", error);
+    alert("清空失败：" + error.message);
+    return;
+  }
+
+  await loadTenants();
+});
+
+function escapeHTML(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 loadTenants();
